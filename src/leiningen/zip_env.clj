@@ -29,21 +29,24 @@
   "Zips files from :zip in project.clj
   to target/project-version.zip"
   [{v :version n :name fs :zip env-files :zip-env-files } & args]
-  (assert (= 1 (count args)) "ony one argument as args can be passed representing env")
+  (assert (> 2 (count args)) "ony one argument as args can be passed representing env")
   (let [env (first args)
-        fs (adapt-fs env fs env-files)]
+]
     [env v n fs env-files]
 
     (with-open [out (-> (str "target/" n "-" v ".zip")
                         (FileOutputStream.)
                         (ZipOutputStream.))]
       (doseq [f (update-paths-with-dir-contents fs)]
-        (with-open [in (input-stream f)]
+        (with-open [in (input-stream (if (and (contains? (set env-files) f) env)
+                                       (adapt-env env f)
+                                       f))]
           (.putNextEntry out (ZipEntry. f))
           (copy in out)
           (.closeEntry out)
           (info "zipped file" f))))))
 
 #_(comment
-  (zip-env {:version "1" :name "hola" :zip ["project.clj" "lib"] :zip-env-files ["project.clj"]} "prod")
+(boolean "true")
+  (zip-env {:version "1" :name "hola" :zip ["project.clj" "lib"] :zip-env-files ["project.clj"]} )
   (io/delete-file "target/hola-1.zip"))
