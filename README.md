@@ -1,4 +1,4 @@
-# lein-zip
+# tangrammer/lein-zip
 
 on top of original lein-zip, this version has the notion of environments
 so you can package file-prod.ext as file.ext if you need too
